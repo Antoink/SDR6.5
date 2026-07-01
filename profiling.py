@@ -27,11 +27,7 @@ from comparateur import show_comparateur_page
 from classement import show_classement_page
 import glob
 
-from relative_utils import (
-    find_column, get_value, get_display_value, get_percentile,
-    is_convertible, is_already_relative, get_relative_mode,
-    init_relative_mode
-)
+
 
 # Mapping pour faire correspondre les Libellés UI -> Colonnes Excel
 # Mapping pour faire correspondre les Libellés UI -> Colonnes Excel
@@ -1137,7 +1133,7 @@ def format_pct_display(pct):
 
 def show_profiling_page(df_main=None):
     inject_custom_css()
-    init_relative_mode()
+    
     st.markdown("""<div style='position:absolute; top:-50px; left:0; font-size:10px; color:#888; font-weight:bold;'>Antoine Kaczmarek - DEPARTEMENT PERFORMANCE - STADE DE REIMS</div>""", unsafe_allow_html=True)
 
     import base64
@@ -1251,7 +1247,7 @@ def show_profiling_page(df_main=None):
             else:
                 anthro_vals[label] = f"{smart_format(val)}{unit}" if val else "-"
         
-        use_relative = st.toggle("🔄 Afficher en valeurs Relatives (N/kg, W/kg)",value=get_relative_mode(),key="use_relative_mode", help="Convertit automatiquement les valeurs en Newtons (N) et Watts (W) en N/kg et W/kg")
+        use_relative = st.toggle("Afficher en valeurs Relatives (N/kg, W/kg)", key="use_relative_mode")
         photo_path = get_best_photo_path(p_sel) 
         img_src = f"data:image/png;base64,{img_to_b64(photo_path)}" if photo_path else ""
         img_html = f'<img src="{img_src}" class="hero-photo">' if img_src else '<div class="hero-photo" style="display:flex;align-items:center;justify-content:center;background:#222;color:#555;font-size:10px;">PHOTO</div>'
