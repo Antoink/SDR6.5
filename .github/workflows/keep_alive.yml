@@ -2,8 +2,8 @@ name: Keep Streamlit Alive
 
 on:
   schedule:
-    - cron: '0 */6 * * *' # S'exécute automatiquement toutes les 6 heures
-  workflow_dispatch: # Te permet de le lancer manuellement avec le bouton
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
 
 jobs:
   ping:
@@ -11,21 +11,17 @@ jobs:
     steps:
       - name: Keep alive via API
         run: |
-          # 1. On génère le texte avec la date actuelle et on l'encode en base64
           CONTENT=$(echo "Keep alive $(date)" | base64 -w 0)
           
-          # 2. On récupère l'identifiant (SHA) du fichier existant s'il existe déjà
           SHA=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
             "https://api.github.com/repos/${{ github.repository }}/contents/keep_alive.txt" | jq -r '.sha // empty')
           
-          # 3. On prépare les données JSON à envoyer à l'API GitHub
           if [ -z "$SHA" ]; then
             DATA="{\"message\":\"Keep alive ping\",\"content\":\"$CONTENT\"}"
           else
             DATA="{\"message\":\"Keep alive ping\",\"content\":\"$CONTENT\",\"sha\":\"$SHA\"}"
           fi
           
-          # 4. On force la mise à jour du fichier directement sur GitHub (sans git push)
           curl -X PUT \
             -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
             -H "Content-Type: application/json" \
