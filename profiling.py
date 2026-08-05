@@ -1049,7 +1049,6 @@ def get_effective_norm(label, norm_val, effective_mode, poids_joueur):
 def get_norm_text(label, effective_mode=None, poids_joueur=None):
     col_clean = str(label).replace("(G)", "").replace("(D)", "").strip()
     
-    # 1. On force la recherche du nom exact en priorité
     found_key = col_clean if col_clean in REPORT_NORMES else next((k for k in REPORT_NORMES.keys() if k in col_clean), None)
     
     if not found_key: return "-"
@@ -1059,22 +1058,19 @@ def get_norm_text(label, effective_mode=None, poids_joueur=None):
     unit_abs = get_unit(label)
     unit_abs_lower = unit_abs.lower()
 
-    # 2. Conversion automatique de LA NORME (km/h vs m/s)
-    is_speed = any(x in unit_abs_lower for x in ["m/s", "km/h"]) or any(x in label.lower() for x in ["vmax", "v0", "speed"])
+    is_speed = (any(x in unit_abs_lower for x in ["m/s", "km/h"]) or any(x in label.lower() for x in ["vmax", "v0", "speed"])) and "²" not in unit_abs_lower
     
     if is_speed and isinstance(norm_val, (int, float)):
         is_kmh_native = norm_val > 15 or "km/h" in unit_abs_lower
         val_kmh = norm_val if is_kmh_native else norm_val * 3.6
         val_ms = norm_val / 3.6 if is_kmh_native else norm_val
         
-        # On vérifie si l'utilisateur a cliqué sur le bouton m/s
         show_ms = st.session_state.get("show_ms_global", False)
         
         norm_val = val_ms if show_ms else val_kmh
         unit_abs = "m/s" if show_ms else "km/h"
         unit_abs_lower = unit_abs.lower()
 
-    # 3. Formatage de l'unité finale
     if effective_mode:
         unit_display = "N/kg" if "n" in unit_abs_lower else "W/kg" if "w" in unit_abs_lower else "kg/kg" if "kg" in unit_abs_lower else unit_abs
     else:
@@ -1082,7 +1078,6 @@ def get_norm_text(label, effective_mode=None, poids_joueur=None):
         
     suffix = f" {unit_display}"
     
-    # 4. Affichage final de l'objectif
     if isinstance(norm_val, (list, tuple)):
         low, high = norm_val
         if is_inverted(label):
@@ -1708,7 +1703,7 @@ def show_profiling_page(df_main=None):
             unit_abs_lower = unit_abs.lower()
             
             # --- INTERCEPTION VITESSES (Nouveauté) ---
-            is_speed = any(x in unit_abs_lower for x in ["m/s", "km/h"]) or any(x in label.lower() for x in ["vmax", "v0", "speed"])
+            is_speed = (any(x in unit_abs_lower for x in ["m/s", "km/h"]) or any(x in label.lower() for x in ["vmax", "v0", "speed"])) and "²" not in unit_abs_lower
             
             if is_speed and val_abs is not None:
                 # Si > 15, physiquement c'est du km/h. Sinon, c'est du m/s.
